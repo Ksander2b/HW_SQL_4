@@ -14,11 +14,12 @@ ON t.album_id = a.id
 GROUP BY a.name;
 
 SELECT s.name AS singer_name, a.YEAR AS album_year FROM singer s 
-JOIN singer_album sa 
-ON s.id = sa.singer_id 
-JOIN albums a 
-ON sa.singer_id = a.id 
-WHERE a.YEAR NOT IN ('2020');
+JOIN singer_album sa ON s.id = sa.singer_id 
+JOIN albums a ON sa.singer_id = a.id 
+WHERE s.name != (SELECT s.name AS singer_name FROM singer s 
+JOIN singer_album sa ON s.id = sa.singer_id 
+JOIN albums a ON sa.singer_id = a.id 
+WHERE a.YEAR IN ('2020'));
 
 SELECT DISTINCT c.name FROM collections c 
 JOIN collection_track ct ON c.id = ct.collection_id
@@ -47,9 +48,10 @@ WHERE t.duration = (SELECT MIN(t2.duration) FROM tracks t2);
 
 SELECT a.name FROM albums a 
 JOIN tracks t ON a.id = t.album_id 
-GROUP BY a.name 
-ORDER BY COUNT(t.name)
-LIMIT 1;
+GROUP BY a.name
+HAVING a.name = (SELECT a.name FROM albums a 
+JOIN tracks t ON a.id = t.album_id GROUP BY a.name ORDER BY COUNT(t.name)
+LIMIT 1);
 
 
 
